@@ -87,8 +87,75 @@ public class ClientConsole implements ChatIF
       {
         message = fromConsole.nextLine();
         client.handleMessageFromClientUI(message);
+        if (message.startsWith("#")) {
+         	String command = message.substring(1);
+         	switch (command) {
+         	
+         	
+         	case "quit":
+         		client.quit();
+         	
+         	
+         	
+         	case "gethost":
+         		display("Client: " + client.getHost());
+         		break;
+         	
+         	
+         	
+         	case "getport":
+         		display("Port: ") " + client.getPort());
+         		break;
+         		
+         	case "logoff":
+         		client.closeConnection();
+         		break;
+         	
+         	
+         	case "login":
+         		if(client.isConnected()) {
+         			display("You're already connected.");
+         		} else {
+         			client.openConnection();
+         		}
+         		break;
+         	
+         	
+         	
+         	default:
+         		if (command.startsWith("sethost")) {
+         			if (client.isConnected()) {
+         				display("Error, you have to be offline to sethost.");
+         			} else {
+         				String host = command.substring(8).trim();
+         				client.setHost(host);
+         				display("Client: " + host);
+         			}
+         			break;
+         		} else if (command.startsWith("setport")) {
+         			if (client.isConnected()) {
+         				display("Error, you have to be offline to setport");
+         			} else {
+         				try {
+         					int port = Integer.parseInt(command.substring(8).trim());
+ 							client.setPort(port);
+ 							display("Port " + port);
+ 						} catch (NumberFormatException e) {
+ 							display("Invalid port parameter");
+ 						}
+         			}
+         			break;
+         		}
+         		display("Command unvalid");
+         	}
+         } else {
+         	client.handleMessageFromClientUI(message);
+         }
+
       }
     } 
+    
+    
     catch (Exception ex) 
     {
       System.out.println
@@ -118,22 +185,17 @@ public class ClientConsole implements ChatIF
   public static void main(String[] args) 
   {
     String host = "";
-    int NumPort;
 
 
     try
     {
       host = args[0];
-      NumPort = Integer.parseInt(args[1]);
-      
     }
     catch(ArrayIndexOutOfBoundsException e)
     {
       host = "localhost";
-      NumPort = DEFAULT_PORT;
-      
     }
-    ClientConsole chat= new ClientConsole(host, NumPort);
+    ClientConsole chat= new ClientConsole(host, DEFAULT_PORT);
     chat.accept();  //Wait for console data
   }
 }

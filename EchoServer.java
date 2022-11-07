@@ -17,6 +17,7 @@ import ocsf.server.*;
  */
 public class EchoServer extends AbstractServer 
 {
+	ChatIF serverUI;
   //Class variables *************************************************
   
   /**
@@ -35,6 +36,11 @@ public class EchoServer extends AbstractServer
   {
     super(port);
   }
+  public EchoServer(int port, ChatIF sUI) throws IOException
+  {
+    super(port);
+    this.serverUI = sUI;
+  }
 
   
   //Instance methods ************************************************
@@ -46,16 +52,104 @@ public class EchoServer extends AbstractServer
    * @param client The connection from which the message originated.
    */
   public void handleMessageFromClient
-    (Object msg, ConnectionToClient client)
+  (Object msg, ConnectionToClient client)
+{
+	  if((boolean)(client.getInfo("isFirstMessage"))){
+			
+		  String[] msg_ = (String.valueOf(msg)).split(" ", 2);
+			if(msg_[0].equals("#login")){
+				client.setInfo("loginID", msg_[1]);
+			}
+			else{
+				try{
+					client.sendToClient("You are not loged in");
+					client.close();
+				}
+				catch(IOException e){
+				}
+			}
+		}
+		else{
+			if((String.valueOf(msg)).startsWith("#login")){
+				try{
+					client.sendToClient("You are already loged in");
+				}
+				catch(IOException e){
+				}
+			}
+			System.out.println("Message received: " + msg + " from " + client.getInfo("loginID"));
+		    this.sendToAllClients(String.valueOf(client.getInfo("loginID"))+ ": "+ msg);
+		}
+}
+
+public void handleMessageFromServerUI(String message)
+{
+  if (message.startsWith("#"))
   {
-    System.out.println("Message received: " + msg + " from " + client);
-    this.sendToAllClients(msg);
+  	handleCommand(message);
   }
-    
-  /**
-   * This method overrides the one in the superclass.  Called
-   * when the server starts listening for connections.
-   */
+  else
+  {
+    // send message to clients
+    serverUI.display(message);
+    this.sendToAllClients("SERVER MSG> " + message);
+  }
+}
+
+private void handleCommand(String command) {
+	  if(command.equals("#quit")) {
+		  serverUI.display("BYE!");
+		  quit();
+	  }
+	  else if(command.toLowerCase().equals("#stop")) {
+		  stopListening();
+	  }
+	  else if(command.toLowerCase().equals("#close")) {
+		  try
+	      {
+	        close();
+	      }
+	      catch(IOException e) {}
+	  }
+	  else if(command.toLowerCase().startsWith("#setport")) {
+		  if (!isListening() && getNumberOfClients() == 0)
+	      {
+	        int newPort = Integer.parseInt(command.substring(9));
+	        setPort(newPort);
+	        serverUI.display
+	          ("Server port changed to " + getPort());
+	      }
+	      else
+	      {
+	        serverUI.display
+	          ("The server must be closed.");
+	      }
+	  }
+	  else if(command.toLowerCase().equals("#getport")) {
+		  serverUI.display("Current port is: " + getPort());
+	  }
+	  else if (command.equalsIgnoreCase("#start")){
+	      if (!isListening()){
+	    	  try{
+	    		  listen();
+	    		 }
+	        catch(Exception ex){
+	        	serverUI.display("Error - Could not listen for clients!");
+	        	}
+	      }
+	      else{
+	    	  serverUI.display
+	    	  ("The server is already listening for clients.");
+	      }
+	    }
+	  else
+		  serverUI.display("The command does not exist.");
+}
+  
+/**
+ * This method overrides the one in the superclass.  Called
+ * when the server starts listening for connections.
+ */
   protected void serverStarted()
   {
     System.out.println
