@@ -58,7 +58,7 @@ public class EchoServer extends AbstractServer
 			
 		  String[] msg_ = (String.valueOf(msg)).split(" ", 2);
 			if(msg_[0].equals("#login")){
-				client.setInfo("loginID", msg_[1]);
+				client.setInfo(" ", msg_[1]);
 			}
 			else{
 				try{
@@ -72,7 +72,7 @@ public class EchoServer extends AbstractServer
 		else{
 			if((String.valueOf(msg)).startsWith("#login")){
 				try{
-					client.sendToClient("You are already loged in");
+					client.sendToClient("ERROR: YOU ARE LOGGED IN ALREADY!");
 				}
 				catch(IOException e){
 				}
@@ -98,12 +98,10 @@ public void handleMessageFromServerUI(String message)
 
 private void handleCommand(String command) {
 	  if(command.equals("#quit")) {
-		  serverUI.display("BYE!");
+		  serverUI.display("END.");
 		  quit();
 	  }
-	  else if(command.toLowerCase().equals("#stop")) {
-		  stopListening();
-	  }
+	  
 	  else if(command.toLowerCase().equals("#close")) {
 		  try
 	      {
@@ -121,8 +119,7 @@ private void handleCommand(String command) {
 	      }
 	      else
 	      {
-	        serverUI.display
-	          ("The server must be closed.");
+	        serverUI.display("The server must be closed.");
 	      }
 	  }
 	  else if(command.toLowerCase().equals("#getport")) {
