@@ -80,6 +80,66 @@ public class ServerConsole implements ChatIF
   {
     System.out.println("> " + message);
   }
+  public void command(String message) throws IOException {
+	  if (message.startsWith("#")) {
+       	String command = message.substring(1);
+       	switch (command) {
+       	
+       	
+       	case "quit":
+     
+       
+     	  display("System Shut Down.");
+          server.sendToAllClients("Server is down.");
+          server.stopListening();
+          server.close();
+          break;
+
+       case "stop":
+    	   
+
+          server.stopListening();
+          break;
+
+       case "close":
+    	   
+
+          System.out.println("Server Closed.");
+          server.sendToAllClients("Server is Closed");
+          server.close();
+          break;
+          
+       case "#setport":
+
+      
+
+          String m = message.split(" ")[1] ;
+          if ( server.isListening() ) {
+              System.out.println("Port set to " + m + ". The server has to be closed to do the changes.");
+          }
+          else {
+              System.out.println("Port set to " + m + ".");
+              server.setPort(Integer.parseInt(m));
+          }
+          break;
+
+       case "#start":
+    	   
+
+          server.listen();
+          break;
+
+       case "#getport":
+
+          System.out.println(server.getPort());
+          break;
+
+      
+  }
+	  }
+  }
+  
+       	
 
   
   //Class methods ***************************************************
